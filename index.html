@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SI Fahim — Retoucher &amp; Image Editor</title>
+<meta name="description" content="Photoshop retoucher and image editor. Cut-out and masking, colour grading, black-and-white conversion, skin retouching, restoration and print preparation — demonstrated live in the browser.">
+<meta name="theme-color" content="#141414">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23141414'/%3E%3Crect x='5' y='7' width='9' height='18' fill='%23E8E4DC'/%3E%3Crect x='18' y='7' width='9' height='18' fill='%23FF5A2B'/%3E%3C/svg%3E">
+</head>
+<body>
+<!--
+THESIS: A retoucher's portfolio should be operable, not browsable. This page is a colour-grading suite: the visitor runs the corrections on real photographs and watches live scopes respond. It refuses the category default — the near-black gallery of hover-zoom thumbnails that proves nothing.
+OWN-WORLD: Calibrated grading room. Neutral 18% grey surround, near-black image wells, one signal orange for active controls, phosphor-green scope traces. Chivo for interface, Martian Mono for measurement. Every number is real, computed from the pixels on screen.
+STORY: The visitor sees an image they can push, watches the instruments agree, understands this person controls images at the data level, and makes contact.
+FIRST VIEWPORT: Full-bleed portrait in the grading well, A/B flip and grade controls beneath it, live waveform + RGB parade + histogram reading the actual canvas at the right. Name and role sit small in the top rail; contact is the one warm control.
+FORM: Colour-grading suite; candidate 4 of the grounded list; seed key 91252ec9.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="rail">
+  <div class="rail__in">
+    <a class="ident" href="#top">
+      <img class="ident__chip ident__avatar" src="assets/img/avatar.jpg" alt="SI Fahim" width="26" height="26" loading="eager" decoding="async">
+      <span class="ident__txt">
+        <span class="ident__name">SI Fahim</span>
+        <span class="ident__role">Retoucher &amp; Image Editor</span>
+      </span>
+    </a>
+
+    <nav class="rail__nav" aria-label="Sections">
+      <a href="#suite">Suite</a>
+      <a href="#work">Work</a>
+      <a href="#craft">Craft</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <a class="cta" href="mailto:ayyfahim@gmail.com">Start a project</a>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ================= SUITE ================= -->
+<section class="suite" id="top">
+  <div class="suite__grid">
+
+    <div class="suite__stage">
+      <div class="well" id="well">
+        <img id="srcImg" class="hidden-src" src="assets/img/hero-portrait.jpg" alt="">
+        <canvas id="mainCanvas" role="img"
+          aria-label="A portrait of a woman in dappled sunlight. The grading controls below change its exposure, contrast, saturation and temperature; the scopes at the right measure the result."></canvas>
+
+        <div class="well__tag">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="stateLabel">Graded</span>
+        </div>
+
+        <button class="well__ab" id="abBtn" type="button" aria-pressed="false">
+          <span class="well__ab-k">A/B</span>
+          <span class="well__ab-l">Hold to see the original</span>
+        </button>
+      </div>
+
+      <div class="deck">
+        <div class="deck__row">
+          <h1 class="lede">I take images apart<br>and put them back <em>right.</em></h1>
+          <p class="lede__sub">
+            Retouching, compositing, colour and restoration. Everything below is running
+            live on this page — push a slider and watch the instruments move.
+          </p>
+        </div>
+
+        <div class="deck__ctrls">
+          <div class="ctrl">
+            <label for="cExp">Exposure</label>
+            <input id="cExp" type="range" min="-60" max="60" value="6" step="1">
+            <output for="cExp" id="oExp">+6</output>
+          </div>
+          <div class="ctrl">
+            <label for="cCon">Contrast</label>
+            <input id="cCon" type="range" min="-50" max="70" value="18" step="1">
+            <output for="cCon" id="oCon">+18</output>
+          </div>
+          <div class="ctrl">
+            <label for="cSat">Saturation</label>
+            <input id="cSat" type="range" min="-100" max="80" value="-8" step="1">
+            <output for="cSat" id="oSat">−8</output>
+          </div>
+          <div class="ctrl">
+            <label for="cTmp">Temperature</label>
+            <input id="cTmp" type="range" min="-60" max="60" value="10" step="1">
+            <output for="cTmp" id="oTmp">+10</output>
+          </div>
+
+          <div class="deck__acts">
+            <button class="chip" type="button" data-look="reset">Neutral</button>
+            <button class="chip" type="button" data-look="warm">Warm</button>
+            <button class="chip" type="button" data-look="teal">Teal</button>
+            <button class="chip" type="button" data-look="bleach">Bleach</button>
+            <button class="chip" type="button" data-look="mono">Mono</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="scopes" aria-label="Live image measurement">
+      <div class="scope">
+        <div class="scope__hd"><span>Waveform</span><span class="scope__u">luma / IRE</span></div>
+        <canvas id="scopeWave" role="img" aria-label="Luminance waveform of the graded image, updating live."></canvas>
+      </div>
+      <div class="scope">
+        <div class="scope__hd"><span>RGB parade</span><span class="scope__u">R · G · B</span></div>
+        <canvas id="scopeParade" role="img" aria-label="RGB parade of the graded image, updating live."></canvas>
+      </div>
+      <div class="scope">
+        <div class="scope__hd"><span>Histogram</span><span class="scope__u">0 – 255</span></div>
+        <canvas id="scopeHist" role="img" aria-label="Tonal histogram of the graded image, updating live."></canvas>
+      </div>
+      <dl class="readout">
+        <div><dt>Black</dt><dd id="rBlack">—</dd></div>
+        <div><dt>White</dt><dd id="rWhite">—</dd></div>
+        <div><dt>Mean</dt><dd id="rMean">—</dd></div>
+        <div><dt>Clipped</dt><dd id="rClip">—</dd></div>
+      </dl>
+    </aside>
+
+  </div>
+</section>
+
+<!-- ================= WORK ================= -->
+<section class="band" id="work">
+  <div class="shell">
+    <div class="hd">
+      <h2>Selected work</h2>
+      <p>Each plate is a real technique running in the browser. Drag any divider, or use the slider under it.</p>
+    </div>
+
+    <div class="plates">
+
+      <figure class="plate plate--lead" data-fx="mask">
+        <div class="plate__well">
+          <img class="hidden-src" data-src src="assets/img/bw-oldman.jpg" alt="">
+          <canvas data-cv role="img" aria-label="A bearded man photographed against black. One side shows the original, the other shows the extracted subject over a replacement background, with individual hairs preserved."></canvas>
+          <div class="plate__div" data-div aria-hidden="true"><i></i></div>
+        </div>
+        <input class="plate__rng" type="range" min="0" max="100" value="50" aria-label="Reveal the extracted subject">
+        <figcaption>
+          <h3>Cut-out &amp; edge work</h3>
+          <p>Flyaway hair separated from a black ground and placed on a new background. The hardest edge in retouching, and the one that exposes a bad mask instantly.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="plate" data-fx="bw">
+        <div class="plate__well">
+          <img class="hidden-src" data-src src="assets/img/portrait-woman2.jpg" alt="">
+          <canvas data-cv role="img" aria-label="A portrait shown in colour on one side and as a channel-mixed black-and-white conversion on the other."></canvas>
+          <div class="plate__div" data-div aria-hidden="true"><i></i></div>
+        </div>
+        <input class="plate__rng" type="range" min="0" max="100" value="50" aria-label="Reveal the black and white conversion">
+        <figcaption>
+          <h3>Black &amp; white conversion</h3>
+          <p>Channel-weighted, not desaturated. Skin holds its separation from the background instead of collapsing into the same grey.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="plate" data-fx="restore">
+        <div class="plate__well">
+          <img class="hidden-src" data-src src="assets/img/restore-archive.jpg" alt="">
+          <canvas data-cv role="img" aria-label="A faded archival photograph on one side and the same image restored with recovered contrast and neutralised colour cast on the other."></canvas>
+          <div class="plate__div" data-div aria-hidden="true"><i></i></div>
+        </div>
+        <input class="plate__rng" type="range" min="0" max="100" value="50" aria-label="Reveal the restored image">
+        <figcaption>
+          <h3>Restoration</h3>
+          <p>Faded density rebuilt, the age cast neutralised and the tonal range pulled back out, without inventing detail the original never had.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="plate" data-fx="grade">
+        <div class="plate__well">
+          <img class="hidden-src" data-src src="assets/img/grade-tokyo.jpg" alt="">
+          <canvas data-cv role="img" aria-label="A neon-lit street at night, ungraded on one side and colour graded with lifted shadows and split toning on the other."></canvas>
+          <div class="plate__div" data-div aria-hidden="true"><i></i></div>
+        </div>
+        <input class="plate__rng" type="range" min="0" max="100" value="50" aria-label="Reveal the colour grade">
+        <figcaption>
+          <h3>Colour grade</h3>
+          <p>Shadows cooled and lifted, highlights held warm. Mixed street lighting brought to one deliberate palette instead of six competing ones.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="plate" data-fx="skin">
+        <div class="plate__well">
+          <img class="hidden-src" data-src src="assets/img/portrait-girl.jpg" alt="">
+          <canvas data-cv role="img" aria-label="A portrait with tone evened across the skin on one side, texture preserved."></canvas>
+          <div class="plate__div" data-div aria-hidden="true"><i></i></div>
+        </div>
+        <input class="plate__rng" type="range" min="0" max="100" value="50" aria-label="Reveal the retouched skin">
+        <figcaption>
+          <h3>Skin retouching</h3>
+          <p>Frequency separation: blotchy colour evened out on the low frequency while pores and fine texture stay untouched on the high. Skin that still reads as skin.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="plate" data-fx="line">
+        <div class="plate__well">
+          <img class="hidden-src" data-src src="assets/img/cut-flower.jpg" alt="">
+          <canvas data-cv role="img" aria-label="A flower photograph converted to clean high-contrast black-and-white line artwork for printing."></canvas>
+          <div class="plate__div" data-div aria-hidden="true"><i></i></div>
+        </div>
+        <input class="plate__rng" type="range" min="0" max="100" value="50" aria-label="Reveal the print-ready artwork">
+        <figcaption>
+          <h3>Print-ready artwork</h3>
+          <p>Photograph reduced to solid ink and clean paper for physical print. The same process behind keepsake handprint and footprint pieces.</p>
+        </figcaption>
+      </figure>
+
+    </div>
+
+
+  </div>
+</section>
+
+<!-- ================= CRAFT ================= -->
+<section class="band band--pale" id="craft">
+  <div class="shell">
+    <div class="hd hd--pale">
+      <h2>What I do</h2>
+      <p>Production retouching, delivered to spec and on schedule.</p>
+    </div>
+
+    <ol class="craft">
+      <li>
+        <span class="craft__n">01</span>
+        <h3>Cut-out &amp; masking</h3>
+        <p>Hair, fur, fabric, glass and motion edges isolated with a real alpha channel. Not a hard lasso with a feather on it.</p>
+      </li>
+      <li>
+        <span class="craft__n">02</span>
+        <h3>Colour &amp; grading</h3>
+        <p>Neutralising casts, matching shots to each other, and building a consistent look across a whole shoot or catalogue.</p>
+      </li>
+      <li>
+        <span class="craft__n">03</span>
+        <h3>Beauty &amp; skin</h3>
+        <p>Frequency separation and dodge-and-burn. Blemishes and stray hairs go; pores, freckles and structure stay.</p>
+      </li>
+      <li>
+        <span class="craft__n">04</span>
+        <h3>Compositing</h3>
+        <p>Multiple sources combined so the light, perspective, grain and edge quality agree. Those are the parts that give a composite away.</p>
+      </li>
+      <li>
+        <span class="craft__n">05</span>
+        <h3>Restoration</h3>
+        <p>Tears, fading, dust, mould and water damage repaired on scans of irreplaceable originals.</p>
+      </li>
+      <li>
+        <span class="craft__n">06</span>
+        <h3>Print preparation</h3>
+        <p>Correct resolution, colour mode, black values, bleed and transparency, checked at final output size before delivery.</p>
+      </li>
+      <li>
+        <span class="craft__n">07</span>
+        <h3>Batch &amp; template work</h3>
+        <p>Hundreds of files placed into supplied templates at consistent scale and position, so the set looks like one hand made it.</p>
+      </li>
+      <li>
+        <span class="craft__n">08</span>
+        <h3>Keepsake artwork</h3>
+        <p>Handprints, footprints and children's art converted to clean print-ready line artwork with every gap and ridge preserved.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section class="band band--end" id="contact">
+  <div class="shell end">
+    <div class="end__main">
+      <h2>Send me an image<br>and see it come back <em>right.</em></h2>
+      <p>Available for freelance, contract and ongoing retouching work. Happy to run a short test file so you can judge the quality before committing to anything.</p>
+      <div class="end__acts">
+        <a class="cta cta--lg" href="mailto:ayyfahim@gmail.com">ayyfahim@gmail.com</a>
+      </div>
+    </div>
+
+    <dl class="end__meta">
+      <div><dt>Based in</dt><dd>Dhaka, Bangladesh</dd></div>
+      <div><dt>Working hours</dt><dd>08:00 – 21:00 (UTC+6)</dd></div>
+      <div><dt>Software</dt><dd>Photoshop, Lightroom, Capture One</dd></div>
+      <div><dt>Delivery</dt><dd>Layered PSD + flattened export</dd></div>
+    </dl>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="shell foot__in">
+    <p>© <span id="yr">2026</span> SI Fahim</p>
+    <p class="foot__cr">
+      All processing runs client-side; no image leaves your browser.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
